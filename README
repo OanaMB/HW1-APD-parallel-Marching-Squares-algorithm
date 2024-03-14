@@ -1,0 +1,20 @@
+    Acest program reprezinta varianta paralelizata a programului ce realizeaza contururi 
+pentru harti topologice, folosind algoritmul Marching Squares. Diferit fata de varianta secventiala,
+au fost paralelizate functiile init_contour_map, sample_grid, march si rescale_image.
+    In functia main, s-a realizat initializarea tuturor matriciilor necesare stocării imaginilor si
+contururilor si a barierei. Pentru imaginea scalata scaled_image, ca sa evitam adaos la timpul de executie al thread-urilor,
+comparam in main dimensiunile initiale ale imaginii image si in functie de acestea decidem daca scaled_image
+va fi aceeasi ca imaginea initiala sau va trebui sa o redimensionam in thread_function.
+    De asemenea, am creat un typedef struct numit ARGUMENTS și un array de
+acest tip numit arguments care reține, pentru fiecare thread, toți parametri necesari funcțiilor de 
+paralelizat ce vor fi transmisi funcției pthread_create. 
+    Functia thread_function este funcția pe care un thread o execută atunci când apelăm pthread_create. In aceasta sunt executate
+functiile init_contour_map, ce face o mapare pentru toate contururile posibile, rescale_image daca este cazul (imaginea e prea mare),
+sample_grid, care construieste un grid pentru a afla starea fiecarui punct raportata la o valoare de
+izolare σ, si march, ce face corespondenta intre contur si un subgrid.
+Pentru functiile rescale_image si sample_grid a fost folosita si o bariera pentru a face thread-urile sa astepte una dupa alta, 
+intrucat finalizarea acestora este necesara pentru executarea corecta a functiilor urmatoare.
+Mai mult, functiile sunt de tip void si toate headerele functiilor au fost modificate ca sa transmita parametri precum thread_id si P, care ajuta la calcularea
+impartirii iteratiilor, adresele matricilor in care se vor stoca rezultatele obtinute in functii, sau variabila bariera.
+    La final, dupa ce toate thread-urile au terminat de executat functia thread_function si au fost reunite cu pthread_join,
+scriem functia scaled_image intr-un fisier cu functia write_ppm si dezalocam memoria cu free_resources.
